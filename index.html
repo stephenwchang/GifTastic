@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>GifTastic</title>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Animal Gif Search</h1>
+
+    <div id="buttons"></div>
+
+    <form id="user-form">
+      <label for="user-input">Add an animal</label>
+      <input type="text" id="user-input"><br>
+
+      <input id="add-button" type="submit" value="Add an animal">
+      <div id="gifs-display"></div>
+    </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+      let animals = ['dog', 'cat', 'rabbit', 'hamster', 'skunk', 'goldfish', 'bird', 'ferret'];
+
+      // function to initially render buttons on load
+      function renderButtons() {
+        for (i=0; i<animals.length; i++) {
+          $('#buttons').append($('<button>').attr('class', 'animal-button').html(animals[i]));
+        }
+      }
+
+      // user input to create a new button
+      $('#add-button').on('click', function() {
+        event.preventDefault();
+        let name = $('#user-input').val().trim();
+        $('#buttons').append($('<button>').attr('class', 'animal-button').html(name));
+      });
+
+      // api get function on button click
+      $(document).on('click', '.animal-button', function() {
+      let animal = $(this).text();
+
+      var queryURL = 'https://api.giphy.com/v1/gifs/search?q=' +
+        animal + '&api_key=dc6zaTOxFJmzC&limit=10';
+
+      $.ajax({
+        url: queryURL,
+        method: 'GET'
+      }).then(function(response) {
+
+        console.log(response);
+        let results = response.data;
+
+
+        for (var i = 0; i < results.length; i++) {
+
+        let animalDiv = $('<div>');
+        let p = $('<div>').html("rating: " + results[i].rating + "<br> <br>");
+
+        let animalImage = $('<img>').attr({
+          src: results[i].images.fixed_height_still.url,
+          class: 'animal-image',
+          'data-still': 'true',
+          'data-still-url': results[i].images.fixed_height_still.url,
+          'data-animated-url': results[i].images.fixed_height.url
+        });
+        animalDiv.append(animalImage);
+        animalDiv.append(p);
+        $('#gifs-display').prepend(animalDiv);
+
+        }
+
+      });
+    });
+
+    $(document).on('click', '.animal-image', function() {
+      if ($(this).attr('data-still') === 'true') {
+        $(this).attr('src', $(this).attr('data-animated-url'));
+        $(this).attr('data-still', 'false');
+      } else {
+        $(this).attr('src', $(this).attr('data-still-url'));
+        $(this).attr('data-still', 'true');
+
+      }
+    });
+
+
+      renderButtons();
+    </script>
+  </div>
+</body>
+
+</html>
